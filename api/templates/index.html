@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Rezultāti — Čūska kurjers{% endblock %}
+{% block content %}
+<h2>Labākie 10 rezultāti</h2>
+<p>Par katru piegādāto paku spēlētājs saņem 20 punktus.</p>
+{% if scores %}
+<div class="table-scroll">
+<table>
+    <thead><tr><th>Vieta</th><th>Spēlētājs</th><th>Punkti</th><th>Laiks (UTC)</th></tr></thead>
+    <tbody>
+    {% for result in scores %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td><a href="{{ url_for('profile', name=result.name) }}">{{ result.name }}</a></td>
+            <td>{{ result.score }}</td>
+            <td>{{ result.created_at | replace('T', ' ') | replace('Z', '') }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+<p>Vienādu punktu gadījumā augstāk ir agrāk saglabātais rezultāts.</p>
+{% else %}
+<p>Vēl nav saglabātu rezultātu. Palaid spēli un pabeidz pirmo spēli!</p>
+{% endif %}
+<h2>Par spēli</h2>
+<p>Vadi čūsku, savāc krāsainu paku un nogādā to atbilstošajā punktā.
+Spēle darbojas atsevišķā Pygame logā. Šajā mājaslapā var apskatīt rezultātus un profilus.</p>
+{% endblock %}

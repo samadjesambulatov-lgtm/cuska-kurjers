@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Spēlētājs {{ player_name }} — Čūska kurjers{% endblock %}
+{% block content %}
+<h2>Spēlētājs: {{ player_name }}</h2>
+{% if stats %}
+<table class="stats">
+    <tr><th>Spēļu skaits</th><td>{{ stats.games }}</td></tr>
+    <tr><th>Labākais rezultāts</th><td>{{ stats.best_score }} punkti</td></tr>
+</table>
+{% else %}
+<p>Spēlētājs nav atrasts. Ar šo vārdu vēl nav saglabātu spēļu.</p>
+{% endif %}
+<p><a href="/">Atpakaļ uz rezultātiem</a></p>
+{% endblock %}

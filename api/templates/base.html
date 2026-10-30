@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="lv">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Čūska kurjers{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Čūska kurjers</h1>
+        <nav aria-label="Galvenā navigācija">
+            <a href="/">Rezultāti</a>
+            <a href="/rules">Spēles noteikumi</a>
+            <a href="/docs">API dokumentācija</a>
+        </nav>
+    </header>
+    <main>{% block content %}{% endblock %}</main>
+    <footer>Somats Bečers · Python un Pygame</footer>
+</body>
+</html>

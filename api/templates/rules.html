@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Noteikumi — Čūska kurjers{% endblock %}
+{% block content %}
+<h2>Spēles apraksts un noteikumi</h2>
+<p>Čūska kurjers ir 2D Snake spēle. Mērķis ir piegādāt pēc iespējas vairāk paku.</p>
+<h3>Kā spēlēt</h3>
+<ol>
+    <li>Izvēlnē ievadi savu vārdu un nospied Enter.</li>
+    <li>Savāc mazo krāsaino paku. Vienlaikus var nest vienu paku.</li>
+    <li>Aizved to uz tādas pašas krāsas rāmi. Par piegādi saņem 20 punktus un vienu astes posmu.</li>
+    <li>Izvairies no sienām, sava ķermeņa un nomestās astes.</li>
+</ol>
+<h3>Vadība</h3>
+<table>
+    <tr><th>Taustiņš</th><th>Darbība</th></tr>
+    <tr><td>Bultiņas vai WASD</td><td>Maina kustības virzienu</td></tr>
+    <tr><td>P vai Esc</td><td>Pauze un turpināšana</td></tr>
+    <tr><td>Space</td><td>Nomet trīs pēdējos astes posmus</td></tr>
+    <tr><td>Enter</td><td>Sāk spēli vai pēc beigām atver izvēlni</td></tr>
+    <tr><td>F5 izvēlnē</td><td>Atkārtoti ielādē labākos rezultātus</td></tr>
+</table>
+<h3>Divas īpašās mehānikas</h3>
+<p><strong>Paku piegāde.</strong> Punktus dod piegāde pareizās krāsas punktā.
+Pakas savākšana un nepareizās krāsas punkta šķērsošana punktus nedod.</p>
+<p><strong>Astes nomešana.</strong> Ja čūskai ir vismaz septiņi posmi, ar Space var nomest
+pēdējos trīs. Tie piecas spēles sekundes paliek kā pelēks šķērslis. Pauzē šis laiks neiet.</p>
+<h3>Grūtības līmeņi</h3>
+<table>
+    <tr><th>Līmenis</th><th>Piegādes</th><th>Ātrums</th></tr>
+    <tr><td>1</td><td>0–2</td><td>7 soļi sekundē</td></tr>
+    <tr><td>2</td><td>3–5</td><td>9 soļi sekundē</td></tr>
+    <tr><td>3</td><td>6 un vairāk</td><td>11 soļi sekundē</td></tr>
+</table>
+<h3>Spēles beigas un rezultāti</h3>
+<p>Sadursme beidz spēli. Ja jaunai pakai nav brīvas vietas, spēlētājs uzvar.</p>
+<p>Spēles beigās klients nosūta vārdu un punktus serverim. Serveris pievieno UTC laiku
+un saglabā rezultātu SQLite datubāzē. Ja savienojums neizdodas, spēle parāda paziņojumu
+un rezultātu nesaglabā. Mājaslapas tabulu atjauno, pārlādējot lapu.</p>
+{% endblock %}

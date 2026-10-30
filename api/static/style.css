@@ -1,0 +1,21 @@
+body {
+    max-width: 880px;
+    margin: 24px auto;
+    padding: 0 16px;
+    color: #222;
+    background: #fff;
+    font: 16px/1.5 Arial, sans-serif;
+}
+header { border-bottom: 1px solid #aaa; padding-bottom: 14px; }
+h1 { font-size: 28px; margin: 0 0 10px; }
+h2 { font-size: 23px; margin-top: 26px; }
+h3 { font-size: 18px; margin-top: 24px; }
+nav { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+a { color: #165ca4; }
+a:focus-visible { outline: 2px solid #165ca4; outline-offset: 3px; }
+table { border-collapse: collapse; width: 100%; margin: 18px 0; }
+th, td { border: 1px solid #bbb; text-align: left; padding: 9px 12px; }
+th { background: #eee; }
+.table-scroll { overflow-x: auto; }
+.stats { max-width: 460px; }
+footer { border-top: 1px solid #aaa; color: #555; margin-top: 36px; padding-top: 12px; font-size: 14px; }
