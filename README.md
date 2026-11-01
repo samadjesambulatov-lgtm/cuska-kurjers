@@ -137,10 +137,9 @@ spele/
     db.py
     templates/
     static/style.css
-  docs/               ekrānuzņēmumi un paskaidrojums aizstāvēšanai
+  docs/               spēles un mājaslapas ekrānuzņēmumi
   tests/              spēles, API un klienta pārbaudes
-  Dizains.docx        sākotnējais lietotāja dotais spēles apraksts
-  Prezentacija.pdf    6 slaidi ar ekrānuzņēmumiem
+  Dizains.docx        sākotnējais spēles apraksts
   README.md
   requirements.txt
   requirements-dev.txt
@@ -158,40 +157,13 @@ Testi izmanto pagaidu datubāzi. Tie pārbauda piegādes, augšanu, visas
 grūtības pakāpes, astes nomešanu, pauzi, sadursmes, topa kārtošanu,
 ievaddatu validāciju, profilus un datu saglabāšanos pēc pārstartēšanas.
 Atsevišķi pārbaudīta Pygame ievade un zīmēšana, kā arī reāla sūtīšana serverim
-un savienojuma atteikums. `docs/TESTESANA.md` apraksta arī manuālo pārbaudi.
-
-## GitHub un iesniegšana
-
-Lokālā Git vēsture veidota faktiskajā projekta sagatavošanas dienā.
-Iepriekšējo mācību dienu commiti un push nav atdarināti.
-GitHub repozitorijs, skolotāja uzaicinājums un iesniegšana skolas sistēmās
-jāveic ar savu kontu. Pirms iesniegšanas izlasi kodu un izmēģini izmaiņas.
-
-1. GitHub izveido tukšu **privātu** repozitoriju bez sākotnējā README.
-2. Projekta mapē izpildi komandas, ievietojot savu repozitorija adresi:
-
-```text
-git remote add origin https://github.com/TAVS_LIETOTAJVARDS/spele.git
-git push -u origin main
-git push origin v1.0
-```
-
-3. Repozitorija iestatījumos uzaicini skolotāju `chillinxol` kā collaborator.
-4. Mykoob iesniedz repozitorija saiti, Moodle augšupielādē prezentāciju.
-5. Mehāniku ierakstu un skolotāja apstiprinājumu kopīgajā tabulā pārbaudi pats.
-
-Prezentācija ir PDF formātā, ko atļauj uzdevums. Runas piezīmes ir
-`docs/PREZENTACIJAS_RUNA.md`.
-
-Ja maini kodu pēc gala taga, pirms gala iesniegšanas sakārto versiju ar
-skolotāju. Dokumentā norādītie 12.–20.10.2026 termiņi jau ir pagājuši.
+un savienojuma atteikums.
 
 ## Bibliotēku dokumentācija
 
 - [Pygame tastatūras ievade](https://www.pygame.org/docs/ref/key.html)
 - [FastAPI Jinja veidnes](https://fastapi.tiangolo.com/advanced/templates/)
 - [Requests kļūdas un noildze](https://requests.readthedocs.io/en/latest/user/quickstart/)
-
 
 ## Darbs VS Code
 

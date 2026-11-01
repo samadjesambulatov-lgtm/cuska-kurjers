@@ -8,3 +8,8 @@ __pycache__/
 .env
 .venv-before-repair-*/
 .backup/
+
+/Prezentacija.pdf
+/docs/AIZSTAVESANA.md
+/docs/PREZENTACIJAS_RUNA.md
+/docs/TESTESANA.md
