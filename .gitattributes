@@ -7,5 +7,6 @@
 *.txt text eol=lf
 *.bat text eol=crlf
 *.pdf binary
+*.pptx binary
 *.docx binary
 *.png binary

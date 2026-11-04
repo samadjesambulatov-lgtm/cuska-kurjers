@@ -12,6 +12,13 @@ from client.api_client import ApiClient, ApiResult
 CELL = 26
 BOARD_X, BOARD_Y = 22, 82
 WINDOW = (940, 650)
+BACKGROUND = (213, 230, 225)
+TEXT = (36, 64, 63)
+ACCENT = (37, 91, 89)
+INPUT = (237, 242, 226)
+BORDER = (115, 151, 137)
+BOARD = (232, 239, 213)
+GRID = (202, 216, 187)
 COLOR = {
     "red": (200, 45, 45),
     "blue": (45, 85, 200),
@@ -55,7 +62,7 @@ class GameClient:
         x: int,
         y: int,
         small: bool = False,
-        color: tuple[int, int, int] = (30, 30, 30),
+        color: tuple[int, int, int] = TEXT,
     ) -> None:
         """Uzzīmēt teksta rindu ar parasto vai mazo fontu."""
         font = self.small if small else self.font
@@ -167,11 +174,11 @@ class GameClient:
     def draw_menu(self) -> None:
         """Uzzīmēt vārda ievadi, vadības norādes un labākos rezultātus."""
         self.screen.blit(
-            self.title.render("Čūska kurjers", True, (25, 25, 25)), (30, 28)
+            self.title.render("Čūska kurjers", True, ACCENT), (30, 28)
         )
         self.text("Spēlētāja vārds (1–24 rakstzīmes):", 30, 100)
-        pygame.draw.rect(self.screen, (255, 255, 255), (30, 138, 400, 42))
-        pygame.draw.rect(self.screen, (100, 100, 100), (30, 138, 400, 42), 1)
+        pygame.draw.rect(self.screen, INPUT, (30, 138, 400, 42))
+        pygame.draw.rect(self.screen, BORDER, (30, 138, 400, 42), 1)
         self.text(self.name + "_", 40, 145)
         self.text(self.error, 30, 190, small=True, color=(165, 30, 30))
         for i, line in enumerate(
@@ -220,18 +227,18 @@ class GameClient:
         board = pygame.Rect(
             BOARD_X, BOARD_Y, game.width * CELL, game.height * CELL
         )
-        pygame.draw.rect(self.screen, (255, 255, 255), board)
+        pygame.draw.rect(self.screen, BOARD, board)
         for x in range(game.width + 1):
             px = BOARD_X + x * CELL
             pygame.draw.line(
-                self.screen, (224, 224, 224), (px, BOARD_Y), (px, board.bottom)
+                self.screen, GRID, (px, BOARD_Y), (px, board.bottom)
             )
         for y in range(game.height + 1):
             py = BOARD_Y + y * CELL
             pygame.draw.line(
-                self.screen, (224, 224, 224), (BOARD_X, py), (board.right, py)
+                self.screen, GRID, (BOARD_X, py), (board.right, py)
             )
-        pygame.draw.rect(self.screen, (60, 60, 60), board, 1)
+        pygame.draw.rect(self.screen, BORDER, board, 1)
         for color, cell in game.depots.items():
             pygame.draw.rect(
                 self.screen,
@@ -291,7 +298,7 @@ class GameClient:
         )
         if game.paused or self.state == "over":
             overlay = pygame.Surface((WINDOW[0], WINDOW[1]), pygame.SRCALPHA)
-            overlay.fill((255, 255, 255, 220))
+            overlay.fill((*BACKGROUND, 235))
             self.screen.blit(overlay, (0, 0))
             heading = (
                 "Pauze"
@@ -299,7 +306,7 @@ class GameClient:
                 else ("Uzvara!" if game.won else "Spēle beigusies")
             )
             self.screen.blit(
-                self.title.render(heading, True, (25, 25, 25)), (230, 220)
+                self.title.render(heading, True, ACCENT), (230, 220)
             )
             if game.paused:
                 self.text("P vai Esc — turpināt", 230, 280)
@@ -322,7 +329,7 @@ class GameClient:
                 if self.game.over:
                     self.state = "over"
                     self.send_score()
-            self.screen.fill((246, 246, 246))
+            self.screen.fill(BACKGROUND)
             if self.state == "menu":
                 self.draw_menu()
             else:

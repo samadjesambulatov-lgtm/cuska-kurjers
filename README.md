@@ -140,6 +140,7 @@ spele/
   docs/               spēles un mājaslapas ekrānuzņēmumi
   tests/              spēles, API un klienta pārbaudes
   Dizains.docx        sākotnējais spēles apraksts
+  Prezentacija.pptx   6 slaidu PowerPoint prezentācija
   README.md
   requirements.txt
   requirements-dev.txt
