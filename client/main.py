@@ -1,4 +1,7 @@
-"""Vienkārša Pygame izvēlne, laukums, pauze un rezultātu ekrāns."""
+"""Spēles logs: taustiņu nolasīšana, zīmēšana un servera atbilžu parādīšana.
+
+Spēles noteikumi atrodas game/engine.py, HTTP pieprasījumi — api_client.py.
+"""
 
 from queue import Empty, Queue
 from threading import Thread
@@ -9,9 +12,12 @@ from game.names import MAX_NAME_LENGTH, validate_name
 
 from client.api_client import ApiClient, ApiResult
 
+# Viena laukuma rūtiņa ir 26 × 26 pikseļi.
+# BOARD_X un BOARD_Y nosaka, cik tālu no loga malas sākas laukums.
 CELL = 26
 BOARD_X, BOARD_Y = 22, 82
 WINDOW = (940, 650)
+# Krāsas raksta kā (sarkanais, zaļais, zilais); katra vērtība ir no 0 līdz 255.
 BACKGROUND = (213, 230, 225)
 TEXT = (36, 64, 63)
 ACCENT = (37, 91, 89)
@@ -28,7 +34,7 @@ COLOR_NAME = {"red": "sarkana", "blue": "zila", "yellow": "dzeltena"}
 
 
 class GameClient:
-    """Nolasīt taustiņus, zīmēt spēli un saņemt servera atbildes."""
+    """Pārvaldīt spēles logu, izvēlni un saziņu ar spēles noteikumu klasi."""
 
     def __init__(self) -> None:
         """Sagatavot fontus, logu, izvēlni un rezultātu pieprasījumu."""
@@ -38,20 +44,27 @@ class GameClient:
         self.font = pygame.font.SysFont("arial", 20)
         self.small = pygame.font.SysFont("arial", 16)
         self.title = pygame.font.SysFont("arial", 32, bold=True)
+        # Clock palīdz noteikt kadra ilgumu un ierobežot kadru skaitu sekundē.
         self.clock = pygame.time.Clock()
         self.running = True
+        # state nosaka, ko rādīt: menu = izvēlne, playing = spēle, over = beigas.
         self.state = "menu"
         self.name = ""
+        # round_name saglabā šīs partijas vārdu rezultāta nosūtīšanai.
         self.round_name = ""
         self.error = ""
         self.game = CourierGame()
         self.api = ApiClient()
+        # HTTP pieprasījums var aizņemt laiku, tāpēc to veic atsevišķs pavediens.
+        # Tas ieliek atbildi Queue rindā. Galvenais spēles cikls to vēlāk nolasa,
+        # tāpēc servera gaidīšana neaptur spēles logu.
         self.responses: Queue[tuple[str, int, ApiResult]] = Queue()
         self.top: list[dict] = []
         self.top_message = "Ielādē rezultātus..."
         self.save_message = ""
         self.loading_top = False
         self.saving = False
+        # Katrai jaunai partijai ir savs numurs, lai nesajauktu servera atbildes.
         self.round_id = 0
         pygame.key.start_text_input()
         self.load_top()
@@ -66,22 +79,28 @@ class GameClient:
     ) -> None:
         """Uzzīmēt teksta rindu ar parasto vai mazo fontu."""
         font = self.small if small else self.font
+        # render izveido teksta attēlu; blit uzliek to logā vietā (x, y).
         self.screen.blit(font.render(value, True, color), (x, y))
 
     def load_top(self) -> None:
-        """Pieprasīt rezultātus fona pavedienā, neapturot logu."""
+        """Ielādēt labākos rezultātus, kamēr spēles logs turpina darboties."""
+        # loading_top neļauj sākt otru pieprasījumu, kamēr pirmais vēl nav beidzies.
         if self.loading_top:
             return
         self.loading_top = True
         self.top_message = "Ielādē rezultātus..."
 
         def work() -> None:
+            # "top" nozīmē, ka rindā ievietota atbilde ar labākajiem rezultātiem.
             self.responses.put(("top", 0, self.api.load_top()))
 
+        # start sāk darbu fonā. daemon=True ļauj aizvērt programmu,
+        # arī ja šis pieprasījums vēl gaida serveri.
         Thread(target=work, daemon=True).start()
 
     def send_score(self) -> None:
         """Vienu reizi nosūtīt pabeigtās spēles rezultātu."""
+        # Nokopējam partijas datus, lai vēlākas izmaiņas nesajauktu rezultātu.
         name, score, round_id = self.round_name, self.game.score, self.round_id
         self.saving = True
         self.save_message = "Saglabā rezultātu..."
@@ -94,9 +113,11 @@ class GameClient:
         Thread(target=work, daemon=True).start()
 
     def collect_responses(self) -> None:
-        """Atjaunot ekrāna stāvokli ar saņemtajām servera atbildēm."""
+        """Nolasīt gatavās servera atbildes un atjaunot ekrāna paziņojumus."""
         while True:
             try:
+                # get_nowait paņem atbildi uzreiz. Ja atbildes nav, rodas Empty,
+                # mēs izejam no šī cikla un turpinām spēles zīmēšanu.
                 kind, round_id, result = self.responses.get_nowait()
             except Empty:
                 break
@@ -104,6 +125,7 @@ class GameClient:
                 self.loading_top = False
                 self.top = result.scores or []
                 self.top_message = result.message
+            # Saglabāšanas atbildi rāda tikai tad, ja tā pieder šai partijai.
             elif round_id == self.round_id:
                 self.saving = False
                 self.save_message = result.message
@@ -117,6 +139,7 @@ class GameClient:
             return
         self.round_name = self.name
         self.round_id += 1
+        # Jauns CourierGame objekts sāk partiju no sākuma: 0 punkti un 4 posmi.
         self.game = CourierGame()
         self.state = "playing"
         self.error = ""
@@ -125,14 +148,17 @@ class GameClient:
         pygame.key.stop_text_input()
 
     def handle_event(self, event: pygame.event.Event) -> None:
-        """Pārvērst Pygame notikumus izvēlnes vai spēles darbībās."""
+        """Apstrādāt vienu notikumu, piemēram, taustiņu vai loga aizvēršanu."""
         if event.type == pygame.QUIT:
             self.running = False
             return
+        # Ja spēlētājs pārslēdzas uz citu logu, automātiski ieslēdzam pauzi.
         if event.type == pygame.WINDOWFOCUSLOST and self.state == "playing":
             if not self.game.paused:
                 self.game.toggle_pause()
         if self.state == "menu":
+            # TEXTINPUT saņem rakstīto tekstu, arī latviešu burtus.
+            # KEYDOWN zemāk apstrādā vadības taustiņus, piemēram, Enter.
             if event.type == pygame.TEXTINPUT:
                 self.name = (self.name + event.text)[:MAX_NAME_LENGTH]
                 self.error = ""
@@ -148,12 +174,14 @@ class GameClient:
             return
         if event.type != pygame.KEYDOWN:
             return
+        # Beigu ekrānā Enter darbojas pēc rezultāta nosūtīšanas mēģinājuma beigām.
         if self.state == "over":
             if event.key == pygame.K_RETURN and not self.saving:
                 self.state = "menu"
                 pygame.key.start_text_input()
                 self.load_top()
             return
+        # Bultiņām un WASD piešķiram tos pašus četrus kustības virzienus.
         directions = {
             pygame.K_UP: UP,
             pygame.K_w: UP,
@@ -210,13 +238,14 @@ class GameClient:
             self.text(self.save_message, 30, 615, small=True)
 
     def cell_rect(self, cell: tuple[int, int]) -> pygame.Rect:
-        """Pārvērst laukuma koordinātas zīmējamā taisnstūrī."""
+        """Aprēķināt, kur logā jāuzzīmē konkrētā laukuma rūtiņa."""
+        # Piemēram, rūtiņas x = 2 kreisā mala ir 22 + 2 * 26 = 74 pikseļi.
         return pygame.Rect(
             BOARD_X + cell[0] * CELL, BOARD_Y + cell[1] * CELL, CELL, CELL
         )
 
     def draw_board(self) -> None:
-        """Uzzīmēt šūnas, piegādes rāmjus un informācijas kolonnu."""
+        """Uzzīmēt laukumu, čūsku, pakas un tekstu spēles labajā pusē."""
         game = self.game
         self.text(
             f"Čūska kurjers    Punkti: {game.score}    Līmenis: {game.level}",
@@ -228,6 +257,7 @@ class GameClient:
             BOARD_X, BOARD_Y, game.width * CELL, game.height * CELL
         )
         pygame.draw.rect(self.screen, BOARD, board)
+        # Vispirms uzzīmējam režģa vertikālās un horizontālās līnijas.
         for x in range(game.width + 1):
             px = BOARD_X + x * CELL
             pygame.draw.line(
@@ -239,6 +269,8 @@ class GameClient:
                 self.screen, GRID, (BOARD_X, py), (board.right, py)
             )
         pygame.draw.rect(self.screen, BORDER, board, 1)
+        # Vispirms piegādes punkti, tad pelēkās astes, čūska un paka.
+        # Vēlāk zīmētais attēls var pārklāt iepriekš zīmēto.
         for color, cell in game.depots.items():
             pygame.draw.rect(
                 self.screen,
@@ -254,6 +286,7 @@ class GameClient:
                     self.cell_rect(cell).inflate(-2, -2),
                 )
         for i, cell in enumerate(game.snake):
+            # enumerate dod posma numuru i; i == 0 ir galva, to zīmē tumšāku.
             color = (35, 105, 45) if i == 0 else (57, 144, 64)
             pygame.draw.rect(
                 self.screen, color, self.cell_rect(cell).inflate(-2, -2)
@@ -264,6 +297,7 @@ class GameClient:
                 COLOR[game.parcel.color],
                 self.cell_rect(game.parcel.position).inflate(-12, -12),
             )
+        # Ja čūska ved paku, tās krāsu rāda kā mazu kvadrātu galvā.
         if game.carrying:
             pygame.draw.rect(
                 self.screen,
@@ -297,6 +331,8 @@ class GameClient:
             small=True,
         )
         if game.paused or self.state == "over":
+            # Pārklājums aizsedz laukumu un uz tā rāda pauzi vai spēles beigas.
+            # Ceturtā krāsas vērtība 235 nosaka pārklājuma necaurspīdīgumu.
             overlay = pygame.Surface((WINDOW[0], WINDOW[1]), pygame.SRCALPHA)
             overlay.fill((*BACKGROUND, 235))
             self.screen.blit(overlay, (0, 0))
@@ -318,22 +354,32 @@ class GameClient:
                     self.text("Enter — atgriezties izvēlnē", 230, 395)
 
     def run(self) -> None:
-        """Zīmēt līdz 60 kadriem sekundē, kustību uzticot spēles loģikai."""
+        """Atkārtot galveno ciklu, līdz spēlētājs aizver spēles logu."""
         while self.running:
+            # 60 ir maksimālais attēla kadru skaits sekundē, nevis čūskas ātrums.
+            # tick atgriež milisekundes; / 1000 pārvērš tās sekundēs.
+            # min neļauj pēc aiztures vienā kadrā apstrādāt vairāk par 0,25 s.
             seconds = min(self.clock.tick(60) / 1000, 0.25)
+            # 1. Nolasām taustiņus un citus loga notikumus.
             for event in pygame.event.get():
                 self.handle_event(event)
+            # 2. Pārbaudām, vai fonā ir saņemta servera atbilde.
             self.collect_responses()
+            # 3. Atjaunojam spēles datus; čūska kustas 7, 9 vai 11 soļus sekundē.
             if self.state == "playing":
                 self.game.update(seconds)
+                # Pārslēdzamies uz beigu ekrānu un nosūtām rezultātu vienu reizi.
+                # Nākamajā kadrā state vairs nav "playing", tāpēc to neatkārto.
                 if self.game.over:
                     self.state = "over"
                     self.send_score()
+            # 4. Notīrām iepriekšējo attēlu un uzzīmējam visu no jauna.
             self.screen.fill(BACKGROUND)
             if self.state == "menu":
                 self.draw_menu()
             else:
                 self.draw_board()
+            # flip parāda tikko uzzīmēto kadru spēles logā.
             pygame.display.flip()
         pygame.quit()
 
